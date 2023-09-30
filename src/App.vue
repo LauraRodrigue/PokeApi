@@ -22,12 +22,13 @@
   </div>
 
 
-  <div class="container3" style="align-items: center" v-if="busqueda">
+  <div class="container3" style="align-items: center" v-else-if="busqueda">
     <nav class="navbar" style="background-color: #57C4E5;">
       <div class="container-fluid">
         <a class="navbar-brand">Navbar</a>
         <form class="d-flex" role="search">
-          <input  v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
+            aria-label="Search">
           <button @click="buscar()" class="btn btn-outline-success" type="submit">Search</button>
         </form>
       </div>
@@ -52,9 +53,6 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-primary" @click="iniciar()">
-      Ver más
-    </button>
   </div>
 
 
@@ -63,7 +61,8 @@
       <div class="container-fluid">
         <a class="navbar-brand">Navbar</a>
         <form class="d-flex" role="search">
-          <input  v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
+            aria-label="Search">
           <button @click="buscar()" class="btn btn-outline-success" type="submit">Search</button>
         </form>
       </div>
@@ -105,13 +104,11 @@ let busqueda = ref(false);
 let criterioDeBusqueda = ref('')
 let respuesta = ref({});
 
- async function buscar() {
-  hola.value = false;
-  busqueda.value = true;
+async function buscar() {
   let criterio = await axios.get(`https://pokeapi.co/api/v2/pokemon/${criterioDeBusqueda.value.toLowerCase()}`);
 
   let pokemonData = criterio.data;
-    respuesta.value = {
+  respuesta.value = {
     id: pokemonData.id,
     img: pokemonData.sprites.other["official-artwork"].front_default,
     nombre: pokemonData.name,
@@ -132,8 +129,8 @@ async function iniciar() {
   );
 
   for (const result of r.data.results) {
+    busqueda.value = true;
     let c = await axios.get(result.url);
-    console.log(c);
     let pokemonData = {
       url: result.url,
       numero: c.data.id,
@@ -143,8 +140,8 @@ async function iniciar() {
       altura: c.data.height,
       tipos: c.data.types.map((tipo) => tipo.type.name),
       estadisticas: c.data.stats.map((stat) => {
-      return { name: stat.stat.name, cant: stat.base_stat };
-    }),
+        return { name: stat.stat.name, cant: stat.base_stat };
+      }),
     };
     contenedor.value.push(pokemonData);
     console.log(contenedor);
@@ -182,8 +179,8 @@ function getColor(tipo) {
 }
 
 async function obtenerUrlPokemon(url) {
-  hola.value = true;
   busqueda.value = false;
+  hola.value = true;
   let r = await axios.get(url);
   console.log(r);
   contenedor.value = {
