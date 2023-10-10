@@ -1,156 +1,162 @@
-
 <template>
-  <div class="container2" v-if="hola">
-    <div class="texto">
-      <div class="primer">
-        <h1>#{{ contenedor.numero }}</h1>
-        <h1>{{ contenedor.nombre }}</h1>
-        <h2>Peso: {{ contenedor.peso }} KG</h2>
-        <h5>Altura: {{ contenedor.altura }}</h5>
-        <h6 v-for="(tipo, i) in contenedor.tipos" :key="i">{{ tipo }}</h6>
-      </div>
-      <div class="segundo">
-        <h3>Estadísticas:</h3>
-        <div v-for="(stat, i) in contenedor.estadisticas" :key="i">
-          <h6>{{ i }}:{{ stat }}</h6>
-        </div>
-      </div>
-    </div>
-    <div>
-      <img class="imgG" :src="contenedor.imagen" alt="" />
-    </div>
-  </div>
-
-
-  <div class="container3" style="align-items: center" v-else-if="busqueda">
+  <div class="contenedorPadre">
+    <!-- Navbar -->
     <nav class="navbar" style="background-color: #57C4E5;">
       <div class="container-fluid">
-        <a class="navbar-brand">Navbar</a>
+        <a class="navbar-brand">
+          <img class="logo" src="https://res.cloudinary.com/dioxkbk6g/image/upload/v1569205776/Pokeapi/logo-6221638601ef7fa7c835eae08ef67a16_xokydx.png" alt="">
+        </a>
         <form class="d-flex" role="search">
           <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
             aria-label="Search">
-          <button @click="buscar()" class="btn btn-outline-success" type="submit">Search</button>
+          <button @click.prevent="buscar()" class="btn btn-outline-success" type="submit">Buscar</button>
+          <button @click.prevent="iniciar()" class="btn btn-outline-success" type="submit">Inicio</button>
         </form>
       </div>
     </nav>
-    <div>
-      <h1>PokeApi</h1>
-    </div>
-    <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
-      <div class="card" style="width: 18rem; margin: 1%" v-for="(pokemon, index) in contenedor" :key="index">
-        <button @click="obtenerUrlPokemon(pokemon.url)">
-          <img :src="pokemon.imagen" alt="" />
-        </button>
-        <div class="card-body">
-          <h6>N°{{ pokemon.numero }}</h6>
-          <h3>{{ pokemon.nombre }}</h3>
-          <div class="tipos">
-            <button type="button" class="btn btn-primary" v-for="(tipo, i) in pokemon.tipos" :key="i"
-              :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%">
-              {{ tipo }}
-            </button>
+
+    <!-- Conditional Content based on 'busqueda' -->
+    <div class="container3" style="align-items: center" v-if="busqueda && respuesta.id">
+      <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
+        <div class="card text-center">
+          <button @click="obtenerUrlPokemon(respuesta.url)">
+            <img :src="respuesta.img" class="card-img-top" alt="...">
+          </button>
+          <div class="card-body">
+            <h6>N°{{ respuesta.id }}</h6>
+            <h3>{{ respuesta.nombre }}</h3>
+            <div class="tipos">
+              <button type="button" class="btn btn-primary" v-for="(tipo, i) in respuesta.tipos" :key="i"
+                :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%">
+                {{ tipo }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
 
-  <div class="container1" style="align-items: center" v-else>
-    <nav class="navbar" style="background-color: #57C4E5;">
-      <div class="container-fluid">
-        <a class="navbar-brand">Navbar</a>
-        <form class="d-flex" role="search">
-          <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
-            aria-label="Search">
-          <button @click="buscar()" class="btn btn-outline-success" type="submit">Search</button>
-        </form>
-      </div>
-    </nav>
-    <div>
-      <h1>PokeApi</h1>
-    </div>
-    <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
-      <div class="card" style="width: 18rem; margin: 1%" v-for="(pokemon, index) in contenedor" :key="index">
-        <button @click="obtenerUrlPokemon(pokemon.url)">
-          <img :src="pokemon.imagen" alt="" />
-        </button>
-        <div class="card-body">
-          <h6>N°{{ pokemon.numero }}</h6>
-          <h3>{{ pokemon.nombre }}</h3>
-          <div class="tipos">
-            <button type="button" class="btn btn-primary" v-for="(tipo, i) in pokemon.tipos" :key="i"
-              :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%">
-              {{ tipo }}
-            </button>
+    <div class="container2" v-if="hola">
+      <div class="texto">
+        <div class="primer">
+          <h1>#{{ contenedor.numero }}</h1>
+          <h1>{{ contenedor.nombre }}</h1>
+          <h2>Peso: {{ contenedor.peso }} KG</h2>
+          <h5>Altura: {{ contenedor.altura }}</h5>
+          <h6 v-for="(tipo, i) in contenedor.tipos" :key="i">{{ tipo }}</h6>
+        </div>
+        <div class="segundo">
+          <h3>Estadísticas:</h3>
+          <div v-for="(stat, i) in contenedor.estadisticas" :key="i">
+            <h6>{{ i }}:{{ stat }}</h6>
           </div>
         </div>
       </div>
+      <div>
+        <img class="imgG" :src="contenedor.imagen" alt="" />
+      </div>
     </div>
-    <button type="button" class="btn btn-primary" @click="iniciar()">
-      Ver más
-    </button>
+
+
+
+
+    <div class="container1" style="align-items: center" v-else-if="inicio">
+      <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
+        <div class="card" style="width: 18rem; margin: 1%" v-for="(pokemon, index) in contenedor" :key="index">
+          <button @click="obtenerUrlPokemon(pokemon.url)">
+            <img :src="pokemon.imagen" alt="" />
+          </button>
+          <div class="card-body">
+            <h6>N°{{ pokemon.numero }}</h6>
+            <h3>{{ pokemon.nombre }}</h3>
+            <div class="tipos">
+              <button type="button" class="btn btn-primary" v-for="(tipo, i) in pokemon.tipos" :key="i"
+                :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%">
+                {{ tipo }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" @click="iniciar()">
+        Ver más
+      </button>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
+// Define reactive variables
 let contenedor = ref([]);
 let numActual = ref(0);
 let hola = ref(false);
 let busqueda = ref(false);
-let criterioDeBusqueda = ref('')
+let inicio = ref(false);
+let criterioDeBusqueda = ref('');
 let respuesta = ref({});
 
+// Function to search for a Pokemon
 async function buscar() {
-  let criterio = await axios.get(`https://pokeapi.co/api/v2/pokemon/${criterioDeBusqueda.value.toLowerCase()}`);
-
-  let pokemonData = criterio.data;
-  respuesta.value = {
-    id: pokemonData.id,
-    img: pokemonData.sprites.other["official-artwork"].front_default,
-    nombre: pokemonData.name,
-    altura: pokemonData.height,
-    peso: pokemonData.weight,
-    tipos: pokemonData.types.map((tipo) => tipo.type.name),
-    estadisticas: pokemonData.stats.map((stat) => {
-      return { name: stat.stat.name, cant: stat.base_stat };
-    }),
-  };
-}
-
-async function iniciar() {
-  contenedor.value = [];
-  numActual.value += 50;
-  let r = await axios.get(
-    `https://pokeapi.co/api/v2/pokemon?limit=${numActual.value}&offset=0`
-  );
-
-  for (const result of r.data.results) {
-    busqueda.value = true;
-    let c = await axios.get(result.url);
-    let pokemonData = {
-      url: result.url,
-      numero: c.data.id,
-      imagen: c.data.sprites.other["official-artwork"].front_default,
-      nombre: c.data.name,
-      peso: c.data.weight,
-      altura: c.data.height,
-      tipos: c.data.types.map((tipo) => tipo.type.name),
-      estadisticas: c.data.stats.map((stat) => {
+  try {
+    let criterio = await axios.get(`https://pokeapi.co/api/v2/pokemon/${criterioDeBusqueda.value.toLowerCase()}`);
+    let pokemonData = criterio.data;
+    respuesta.value = {
+      url: criterio.config.url,
+      id: pokemonData.id,
+      img: pokemonData.sprites.other["official-artwork"].front_default,
+      nombre: pokemonData.name,
+      altura: pokemonData.height,
+      peso: pokemonData.weight,
+      tipos: pokemonData.types.map((tipo) => tipo.type.name),
+      estadisticas: pokemonData.stats.map((stat) => {
         return { name: stat.stat.name, cant: stat.base_stat };
       }),
     };
-    contenedor.value.push(pokemonData);
-    console.log(contenedor);
+    busqueda.value = true;// Asegúrate de establecer busqueda a true después de obtener la respuesta
+    hola.value = false;
+    inicio.value = false;
+  } catch (error) {
+    console.error(error);
   }
 }
 
 
+// Function to load more Pokemon
+async function iniciar() {
+  busqueda.value = false;
+  hola.value = false;
+  inicio.value = true;
+  try {
+    contenedor.value = [];
+    numActual.value += 50;
+    let r = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=${numActual.value}&offset=0`);
+    for (const result of r.data.results) {
+      let c = await axios.get(result.url);
+      let pokemonData = {
+        url: result.url,
+        numero: c.data.id,
+        imagen: c.data.sprites.other["official-artwork"].front_default,
+        nombre: c.data.name,
+        peso: c.data.weight,
+        altura: c.data.height,
+        tipos: c.data.types.map((tipo) => tipo.type.name),
+        estadisticas: c.data.stats.map((stat) => {
+          return { name: stat.stat.name, cant: stat.base_stat };
+        }),
+      };
+      contenedor.value.push(pokemonData);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
 
-
+// Function to get color based on Pokemon type
 function getColor(tipo) {
   switch (tipo) {
     case "fire":
@@ -178,35 +184,42 @@ function getColor(tipo) {
   }
 }
 
+
+// Function to handle click event on Pokemon card
 async function obtenerUrlPokemon(url) {
-  busqueda.value = false;
-  hola.value = true;
-  let r = await axios.get(url);
-  console.log(r);
-  contenedor.value = {
-    numero: r.data.id,
-    imagen: r.data.sprites.other["official-artwork"].front_default,
-    nombre: r.data.name,
-    peso: r.data.weight,
-    altura: r.data.height,
-    tipos: {
-      tipo1: r.data.types[0].type.name,
-      tipo2: r.data.types[1] ? r.data.types[1].type.name : null,
-    },
-    estadisticas: {
-      Hp: r.data.stats[0].base_stat,
-      Attack: r.data.stats[1].base_stat,
-      Defense: r.data.stats[2].base_stat,
-      Special_Attack: r.data.stats[3].base_stat,
-      Special_Defense: r.data.stats[4].base_stat,
-      Speed: r.data.stats[5].base_stat,
-    },
-  };
+  try {
+    busqueda.value = false;
+    hola.value = true;
+    let r = await axios.get(url);
+    contenedor.value = {
+      numero: r.data.id,
+      imagen: r.data.sprites.other["official-artwork"].front_default,
+      nombre: r.data.name,
+      peso: r.data.weight,
+      altura: r.data.height,
+      tipos: {
+        tipo1: r.data.types[0].type.name,
+        tipo2: r.data.types[1] ? r.data.types[1].type.name : null,
+      },
+      estadisticas: {
+        Hp: r.data.stats[0].base_stat,
+        Attack: r.data.stats[1].base_stat,
+        Defense: r.data.stats[2].base_stat,
+        Special_Attack: r.data.stats[3].base_stat,
+        Special_Defense: r.data.stats[4].base_stat,
+        Speed: r.data.stats[5].base_stat,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-import { onMounted } from 'vue';
+// Trigger the iniciar function when component is mounted
 onMounted(iniciar);
+
 </script>
+
 
 
 <style scoped>
@@ -236,7 +249,8 @@ img {
   height: 100vh;
 }
 
-.container1 {
+.container1, .container3 {
+  margin: 0;
   background-color: #212738;
 }
 
@@ -248,4 +262,9 @@ img {
 .primer {
   width: 100%;
   height: 60%;
-}</style>
+}
+.logo{
+  width: 30%;
+  height: 30%;
+}
+</style>
