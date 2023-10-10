@@ -1,18 +1,31 @@
 <template>
   <div class="contenedorPadre">
     <!-- Navbar -->
+
     <nav class="navbar" style="background-color: #57C4E5;">
       <div class="container-fluid">
         <a class="navbar-brand">
-          <img class="logo" src="https://res.cloudinary.com/dioxkbk6g/image/upload/v1569205776/Pokeapi/logo-6221638601ef7fa7c835eae08ef67a16_xokydx.png" alt="">
+          <img class="logo"
+            src="https://res.cloudinary.com/dioxkbk6g/image/upload/v1569205776/Pokeapi/logo-6221638601ef7fa7c835eae08ef67a16_xokydx.png"
+            alt="">
         </a>
+
         <form class="d-flex" role="search">
           <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
             aria-label="Search">
           <button @click.prevent="buscar()" class="btn btn-outline-success" type="submit">Buscar</button>
-          <button @click.prevent="iniciar()" class="btn btn-outline-success" type="submit">Inicio</button>
+          <div class="dropdown">
+            <select name="" id="" @change="filtrar()" v-model="tipof">
+              <option :value="tipo" v-for="(tipo, i) in tiposDisponibles" :key="i">{{ tipo }}</option>
+            </select>
+          </div>
+          <button @click="iniciar()" class="btn btn-outline-success" type="submit">Inicio</button>
         </form>
       </div>
+
+
+
+
     </nav>
 
     <!-- Conditional Content based on 'busqueda' -->
@@ -36,7 +49,6 @@
       </div>
     </div>
 
-
     <div class="container2" v-if="hola">
       <div class="texto">
         <div class="primer">
@@ -55,6 +67,27 @@
       </div>
       <div>
         <img class="imgG" :src="contenedor.imagen" alt="" />
+      </div>
+    </div>
+
+    <div class="container4" style="align-items: center" v-if="opcionSeleccionada">
+
+      <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
+        <div class="card text-center" v-for="(pokemon, index) in nuevo" :key="index">
+          <button @click="obtenerUrlPokemon(pokemon.url)">
+            <img :src="pokemon.img" class="card-img-top" alt="...">
+          </button>
+          <div class="card-body">
+            <h6>N°{{ pokemon.id }}</h6>
+            <h3>{{ pokemon.nombre }}</h3>
+            <div class="tipos">
+              <button type="button" class="btn btn-primary" v-for="(tipo, i) in pokemon.tipos" :key="i"
+                :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%">
+                {{ tipo }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -99,6 +132,17 @@ let busqueda = ref(false);
 let inicio = ref(false);
 let criterioDeBusqueda = ref('');
 let respuesta = ref({});
+const opcionSeleccionada = ref(false);
+const nuevo = ref([]);
+const componenteNuevo = ref(false);
+
+const tiposDisponibles = [
+  "fire", "water", "grass", "poison", "flying", "bug", "normal", "ground",
+  "electric", "fairy"
+];
+
+
+
 
 // Function to search for a Pokemon
 async function buscar() {
@@ -125,6 +169,44 @@ async function buscar() {
   }
 }
 
+const tipof = ref("")
+
+const filtrar = async () => {
+  try {
+    console.log("h");
+    console.log(tipof.value)
+    nuevo.value = [];
+    let response = await axios.get(`https://pokeapi.co/api/v2/type/${tipof.value}`);
+    let pokemonUrls = response.data.pokemon.map((poke) => poke.pokemon.url);
+
+    await Promise.all(
+      pokemonUrls.map(async (url) => {
+        let pokemonResponse = await axios.get(url);
+        let pokemonData = pokemonResponse.data;
+        console.log(pokemonData)
+        nuevo.value.push({
+          id: pokemonData.id,
+          img: pokemonData.sprites.other["official-artwork"].front_default,
+          nombre: pokemonData.name,
+          altura: pokemonData.height,
+          peso: pokemonData.weight,
+          tipos: pokemonData.types.map((tipo) => tipo.type.name),
+          estadisticas: pokemonData.stats.map((stat) => {
+            return { name: stat.stat.name, cant: stat.base_stat };
+          }),
+        });
+      })
+    );
+    console.log(nuevo.value)
+    componenteNuevo.value = true;
+    hola.value = false;
+    busqueda.value = false;
+    inicio.value = false;
+    opcionSeleccionada.value = true
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 // Function to load more Pokemon
 async function iniciar() {
@@ -180,7 +262,7 @@ function getColor(tipo) {
     case "fairy":
       return "cornflowerblue";
     default:
-      return "white";
+      return "black";
   }
 }
 
@@ -249,7 +331,8 @@ img {
   height: 100vh;
 }
 
-.container1, .container3 {
+.container1,
+.container3 {
   margin: 0;
   background-color: #212738;
 }
@@ -263,7 +346,8 @@ img {
   width: 100%;
   height: 60%;
 }
-.logo{
+
+.logo {
   width: 30%;
   height: 30%;
 }
