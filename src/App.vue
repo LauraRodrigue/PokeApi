@@ -11,11 +11,12 @@
         </a>
 
         <form class="d-flex" role="search">
-          <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Search"
+          <input v-model="criterioDeBusqueda" class="form-control me-2" type="search" placeholder="Buscar..."
             aria-label="Search">
           <button @click.prevent="buscar()" class="btn btn-outline-success" type="submit">Buscar</button>
           <div class="dropdown">
-            <select name="" id="" @change="filtrar()" v-model="tipof">
+            <select name="" id="" @change="filtrar()" v-model="tipof" class="btn btn-outline-success" type="submit">
+              <option value="">🗳️Filtrar</option>
               <option :value="tipo" v-for="(tipo, i) in tiposDisponibles" :key="i">{{ tipo }}</option>
             </select>
           </div>
@@ -31,9 +32,9 @@
     <!-- Conditional Content based on 'busqueda' -->
     <div class="container3" style="align-items: center" v-if="busqueda && respuesta.id">
       <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
-        <div class="card text-center">
-          <button @click="obtenerUrlPokemon(respuesta.url)">
-            <img :src="respuesta.img" class="card-img-top" alt="...">
+        <div class="card" style="width: 18rem; margin: 1%">
+          <button class="poke" @click="obtenerUrlPokemon(respuesta.id)">
+            <img :src="respuesta.img" alt="">
           </button>
           <div class="card-body">
             <h6>N°{{ respuesta.id }}</h6>
@@ -56,12 +57,19 @@
           <h1>{{ contenedor.nombre }}</h1>
           <h2>Peso: {{ contenedor.peso }} KG</h2>
           <h5>Altura: {{ contenedor.altura }}</h5>
-          <h6 v-for="(tipo, i) in contenedor.tipos" :key="i">{{ tipo }}</h6>
+          <h6 class="btn btn-primary" :style="{ backgroundColor: getColor(tipo) }" style="border: solid transparent; margin-left: 3%" v-for="(tipo, i) in contenedor.tipos" :key="i">{{ tipo }}</h6>
         </div>
         <div class="segundo">
           <h3>Estadísticas:</h3>
           <div v-for="(stat, i) in contenedor.estadisticas" :key="i">
-            <h6>{{ i }}:{{ stat }}</h6>
+            <h6 class="progeso">
+              {{ i }}:
+              <div class="progress" role="progressbar" aria-label="Animated striped example" :aria-valuenow="stat"
+                aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" :style="{ width: stat + '%' }"></div>
+              </div>
+              {{ stat }}%
+            </h6>
           </div>
         </div>
       </div>
@@ -73,9 +81,9 @@
     <div class="container4" style="align-items: center" v-if="opcionSeleccionada">
 
       <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
-        <div class="card text-center" v-for="(pokemon, index) in nuevo" :key="index">
-          <button @click="obtenerUrlPokemon(pokemon.url)">
-            <img :src="pokemon.img" class="card-img-top" alt="...">
+        <div class="card" style="width: 18rem; margin: 1%" v-for="(pokemon, index) in nuevo" :key="index">
+          <button class="poke" @click="obtenerUrlPokemon(pokemon.id)">
+            <img :src="pokemon.img" alt="">
           </button>
           <div class="card-body">
             <h6>N°{{ pokemon.id }}</h6>
@@ -97,7 +105,7 @@
     <div class="container1" style="align-items: center" v-else-if="inicio">
       <div class="row row-cols-1 row-cols-md-4 g-3" style="width: 94%; text-align: center; margin: 6%">
         <div class="card" style="width: 18rem; margin: 1%" v-for="(pokemon, index) in contenedor" :key="index">
-          <button @click="obtenerUrlPokemon(pokemon.url)">
+          <button class="poke" @click="obtenerUrlPokemon(pokemon.numero)">
             <img :src="pokemon.imagen" alt="" />
           </button>
           <div class="card-body">
@@ -130,11 +138,12 @@ let numActual = ref(0);
 let hola = ref(false);
 let busqueda = ref(false);
 let inicio = ref(false);
+const opcionSeleccionada = ref(false);
+const componenteNuevo = ref(false);
 let criterioDeBusqueda = ref('');
 let respuesta = ref({});
-const opcionSeleccionada = ref(false);
 const nuevo = ref([]);
-const componenteNuevo = ref(false);
+
 
 const tiposDisponibles = [
   "fire", "water", "grass", "poison", "flying", "bug", "normal", "ground",
@@ -164,6 +173,7 @@ async function buscar() {
     busqueda.value = true;// Asegúrate de establecer busqueda a true después de obtener la respuesta
     hola.value = false;
     inicio.value = false;
+    componenteNuevo.value = false;
   } catch (error) {
     console.error(error);
   }
@@ -185,6 +195,7 @@ const filtrar = async () => {
         let pokemonData = pokemonResponse.data;
         console.log(pokemonData)
         nuevo.value.push({
+          url: pokemonData.species.url,
           id: pokemonData.id,
           img: pokemonData.sprites.other["official-artwork"].front_default,
           nombre: pokemonData.name,
@@ -202,7 +213,7 @@ const filtrar = async () => {
     hola.value = false;
     busqueda.value = false;
     inicio.value = false;
-    opcionSeleccionada.value = true
+    opcionSeleccionada.value = true;
   } catch (error) {
     console.error(error);
   }
@@ -213,6 +224,8 @@ async function iniciar() {
   busqueda.value = false;
   hola.value = false;
   inicio.value = true;
+  componenteNuevo.value = false;
+  opcionSeleccionada.value = false;
   try {
     contenedor.value = [];
     numActual.value += 50;
@@ -267,12 +280,16 @@ function getColor(tipo) {
 }
 
 
-// Function to handle click event on Pokemon card
-async function obtenerUrlPokemon(url) {
+// Function to -handle click event on Pokemon card
+async function obtenerUrlPokemon(id) {
   try {
     busqueda.value = false;
+    inicio.value = false;
+    componenteNuevo.value = false;
+    opcionSeleccionada.value = false;
     hola.value = true;
-    let r = await axios.get(url);
+    let r = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    console.log(r)
     contenedor.value = {
       numero: r.data.id,
       imagen: r.data.sprites.other["official-artwork"].front_default,
@@ -318,7 +335,6 @@ img {
 .row {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
-
 .imgG {
   height: 500px;
   width: 500px;
@@ -327,14 +343,31 @@ img {
 .container2 {
   display: flex;
   flex-direction: row;
-  background-color: #A2DAFF;
   height: 100vh;
+  color:#1d1d85;
+  margin-left: 5%;
 }
 
-.container1,
-.container3 {
-  margin: 0;
-  background-color: #212738;
+.form-control.me-2 {
+  border: 1px solid white;
+  color: blue;
+}
+
+.btn.btn-outline-success {
+  border: 1px solid white;
+  color: white;
+}
+
+.card {
+  background-color: #c4596d;
+  border: 2px solid blue;
+  box-shadow: 5px 5px 10px blue;
+  color: white;
+}
+
+.poke {
+  background-color: #e06c82;
+  border: solid white 1px;
 }
 
 .texto {
@@ -344,11 +377,24 @@ img {
 
 .primer {
   width: 100%;
-  height: 60%;
+  height: 50%;
 }
 
 .logo {
   width: 30%;
   height: 30%;
 }
+
+.navbar {
+  position: relative;
+}
+h1{
+  font-weight: 900;
+  font-size: 300%;
+}
+h3{
+  font-size: 200%;
+  font-weight: 700;
+}
+
 </style>
